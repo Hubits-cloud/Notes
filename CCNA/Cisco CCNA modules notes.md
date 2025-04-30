@@ -6635,3 +6635,547 @@ show running-config | section line vty
 - **AD** prioritizes which route source wins.
 - Networks typically use a combination of **static and dynamic routing**.
 - **Dynamic protocols** provide automatic network discovery and adaptation.
+
+---
+
+# Cisco CCNA 15 Notes
+
+**Module Title**: IP Static Routing
+
+**Objective**: Configure IPv4 and IPv6 static routes.
+
+---
+
+## 15.0 Module Introduction
+
+### 15.0.1 Why Should I Take This Module?
+
+- Even in networks using **dynamic routing**, **static routes** still serve critical purposes.
+- Static routes:
+    - Offer control.
+    - Can be more efficient.
+    - Are often used alongside dynamic routing.
+- This module teaches how to:
+    - **Configure**
+    - **Verify**
+    - **Troubleshoot** static routes.
+
+> 🧠 Think of static routes like hand-washing delicate clothes – sometimes they’re the better fit!
+> 
+
+---
+
+## 15.1 Static Route Concepts
+
+### 15.1.1 Types of Static Routes
+
+| Type | Description |
+| --- | --- |
+| **Standard Static Route** | Manually configured path to a specific network. |
+| **Default Static Route** | Catch-all route used when no specific match is found. |
+| **Floating Static Route** | Backup route with higher Administrative Distance. |
+| **Summary Static Route** | Combines multiple routes into one. |
+
+---
+
+### 15.1.2 Next-Hop Options
+
+| Route Type | Definition |
+| --- | --- |
+| **Next-hop route** | Only next-hop IP is specified. |
+| **Directly connected static route** | Only exit interface is specified. |
+| **Fully specified static route** | Both next-hop IP and exit interface are specified. |
+
+---
+
+### 15.1.3 IPv4 Static Route Syntax
+
+```bash
+ip route <network-address> <subnet-mask> {<ip-address> | <exit-intf> [ip-address]} [distance]
+```
+
+---
+
+### 15.1.4 IPv6 Static Route Syntax
+
+```bash
+ipv6 route <ipv6-prefix>/<prefix-length> {<ipv6-address> | <exit-intf> [ipv6-address]} [distance]
+```
+
+🛑 Must use `ipv6 unicast-routing` to enable IPv6 routing!
+
+---
+
+### 15.1.5–15.1.7 Routing Table States
+
+- At startup, routers only know **directly connected networks**.
+- **Ping tests** fail for destinations outside these networks until routes are added.
+
+---
+
+## 15.2 Configure IP Static Routes
+
+### 15.2.1 IPv4 Next-Hop Static Route
+
+```bash
+R1(config)# ip route 192.168.1.0 255.255.255.0 172.16.2.2
+```
+
+Verifies via `show ip route` with "S" for static.
+
+---
+
+### 15.2.2 IPv6 Next-Hop Static Route
+
+```bash
+R1(config)# ipv6 unicast-routing
+R1(config)# ipv6 route 2001:db8:acad:1::/64 2001:db8:acad:2::2
+```
+
+---
+
+### 15.2.3 IPv4 Directly Connected Static Route
+
+```bash
+R1(config)# ip route 192.168.2.0 255.255.255.0 s0/1/0
+```
+
+✅ Only use for **point-to-point serial** links.
+
+---
+
+### 15.2.4 IPv6 Directly Connected Static Route
+
+```bash
+R1(config)# ipv6 route 2001:db8:cafe:2::/64 s0/1/0
+```
+
+Same rule: only use this for **point-to-point links**.
+
+---
+
+### 15.2.5 IPv4 Fully Specified Static Route
+
+```bash
+R1(config)# ip route 192.168.2.0 255.255.255.0 GigabitEthernet0/0/1 172.16.2.2
+```
+
+✅ Ideal for **Ethernet/multi-access** networks.
+
+---
+
+### 15.2.6 IPv6 Fully Specified Static Route (Link-local)
+
+```bash
+R1(config)# ipv6 route 2001:db8:acad:1::/64 s0/1/0 fe80::2
+```
+
+💡 Required when using a **link-local** next-hop address.
+
+---
+
+### 15.2.7 Verify Static Routes
+
+| Command | Purpose |
+| --- | --- |
+| `show ip route static` | Lists IPv4 static routes. |
+| `show ipv6 route static` | Lists IPv6 static routes. |
+| `show ip route <network>` | Filters to a specific route. |
+| `show run | section ip route` |
+
+---
+
+## 15.3 Default Static Routes
+
+### 15.3.1 Overview
+
+- Matches all traffic:
+    - **IPv4**: `0.0.0.0 0.0.0.0`
+    - **IPv6**: `::/0`
+- Common in **stub routers** or **edge routers**.
+
+---
+
+### 15.3.2 Configure Default Routes
+
+**IPv4**:
+
+```bash
+ip route 0.0.0.0 0.0.0.0 172.16.2.2
+```
+
+**IPv6**:
+
+```bash
+ipv6 route ::/0 2001:db8:acad:2::2
+```
+
+---
+
+### 15.3.3 Verify Default Routes
+
+- `S*` indicates static default route.
+- Asterisk () = **candidate default** (gateway of last resort).
+
+---
+
+## 15.4 Floating Static Routes
+
+### 15.4.1 What is a Floating Static Route?
+
+- Acts as a **backup route**.
+- Has a **higher administrative distance** than the primary route.
+- Used **only when the preferred route fails**.
+
+---
+
+### 15.4.2 Configure Floating Static Routes
+
+**IPv4 Example**:
+
+```bash
+ip route 0.0.0.0 0.0.0.0 10.10.10.2 5
+```
+
+**IPv6 Example**:
+
+```bash
+ipv6 route ::/0 2001:db8:feed:10::2 5
+```
+
+---
+
+### 15.4.3 Test Floating Static Route
+
+- Simulate failure of primary path (e.g., shut R2's interface).
+- Check routing table:
+    - **Floating route becomes active**.
+
+---
+
+## 15.5 Host Routes
+
+### 15.5.1 Overview
+
+- Host route = route to **specific host**:
+    - **IPv4**: `/32`
+    - **IPv6**: `/128`
+
+---
+
+### 15.5.2 Auto-Installed Host Routes
+
+- IOS installs host routes for **each configured interface**.
+- Identified with `L` in `show ip route`.
+
+---
+
+### 15.5.3–15.5.4 Manually Configure Host Routes
+
+**IPv4 Example**:
+
+```bash
+ip route 209.165.200.238 255.255.255.255 198.51.100.2
+```
+
+**IPv6 Example**:
+
+```bash
+ipv6 route 2001:db8:acad:2::238/128 2001:db8:acad:1::2
+```
+
+---
+
+### 15.5.6 IPv6 Host Route with Link-Local
+
+```bash
+ipv6 route 2001:db8:acad:2::238/128 serial 0/1/0 fe80::2
+```
+
+🔑 Required when using a **link-local** next hop.
+
+---
+
+## 15.6 Module Summary
+
+### ✅ What You Learned
+
+- Configure all static route types for both IPv4 and IPv6:
+    - **Standard**
+    - **Default**
+    - **Floating**
+    - **Fully specified**
+    - **Host**
+- Understand how **Administrative Distance** impacts route preference.
+- Use verification tools:
+    - `show ip route`
+    - `ping`
+    - `traceroute`
+    - `show running-config`
+
+---
+
+# Cisco CCNA 16 Notes
+
+**Module Title**: Troubleshoot Static and Default Routes
+
+**Objective**: Troubleshoot static and default route configurations.
+
+---
+
+## 16.0 Module Introduction
+
+### 16.0.1 Why Should I Take This Module?
+
+- This is the final module in the **Switching, Routing, and Wireless Essentials v7.0 (SRWE)** course.
+- You’ve learned how to configure:
+    - Switches
+    - Routers
+    - Wireless devices
+- This module focuses on **troubleshooting** — a vital skill for becoming a great network administrator.
+- You’ll practice troubleshooting static and default routes using:
+    - **Syntax Checker**
+    - **Packet Tracer**
+    - **Hands-on lab**
+
+> 🎯 The best way to learn troubleshooting? Always be troubleshooting.
+> 
+
+---
+
+## 16.1 Static Routes and Packet Forwarding
+
+### 16.1.1 Packet Forwarding Process Review
+
+Scenario: PC1 sends a packet to PC3. Here's what happens:
+
+1. **Packet arrives at R1 (Gig0/0/0)**.
+2. R1 doesn’t have a specific route to 192.168.2.0/24, so it uses its **default static route**.
+3. R1 encapsulates the packet:
+    - Uses “**all 1s**” (broadcast) Layer 2 destination MAC since it’s a **point-to-point link**.
+4. Packet is forwarded out **Serial 0/1/0** to R2.
+5. R2 de-encapsulates, checks routing table:
+    - Finds a **static route** to 192.168.2.0/24 via **Serial 0/1/1**.
+6. R2 forwards frame using another “all 1s” MAC address.
+7. Packet arrives at R3 (Serial 0/1/1).
+8. R3 sees a **connected route** to 192.168.2.0/24 via **Gig0/0/0**.
+9. R3 checks ARP table for PC3’s IP.
+    - If no entry: sends **ARP Request** → PC3 replies with its MAC.
+10. R3 encapsulates and forwards the packet with:
+    - **Source MAC**: R3’s Gig0/0/0
+    - **Destination MAC**: PC3’s MAC
+
+---
+
+## 16.2 Troubleshoot Static and Default Routes
+
+### 16.2.1 Network Changes
+
+- Networks are **dynamic**. Failures or misconfigurations can break connectivity.
+- Causes:
+    - Interface failure
+    - Provider link drop
+    - Saturated links
+    - Admin errors
+- Goal: Use **structured troubleshooting** to quickly isolate and fix issues.
+
+---
+
+### 16.2.2 Common Troubleshooting Commands
+
+| Command | Purpose |
+| --- | --- |
+| `ping` | Tests reachability. |
+| `traceroute` | Traces route to a destination. |
+| `show ip route` | Displays the routing table. |
+| `show ip interface brief` | Quick overview of interface status/IPs. |
+| `show cdp neighbors` | Lists directly connected Cisco devices (Layer 2 validation). |
+
+---
+
+### `ping` Example:
+
+```bash
+R1# ping 192.168.2.1 source 172.16.3.1
+```
+
+> Success rate: 100%
+> 
+> 
+> Indicates connectivity from R1’s LAN to R3’s LAN.
+> 
+
+---
+
+### `traceroute` Example:
+
+```bash
+R1# traceroute 192.168.2.1
+```
+
+> Shows hop-by-hop path to the destination. Useful for finding where packets stop.
+> 
+
+---
+
+### `show ip route` Example:
+
+```bash
+R1# show ip route | begin Gateway
+```
+
+Example Output:
+
+```
+S     172.16.1.0/24 [1/0] via 172.16.2.2
+C     172.16.2.0/24 is directly connected, Serial0/1/0
+...
+```
+
+---
+
+### `show ip interface brief` Example:
+
+```bash
+R1# show ip interface brief
+```
+
+Sample Output:
+
+```
+GigabitEthernet0/0/0   172.16.3.1   YES manual   up   up
+Serial0/1/0            172.16.2.1   YES manual   up   up
+```
+
+---
+
+### `show cdp neighbors` Example:
+
+```bash
+R1# show cdp neighbors
+```
+
+Output Example:
+
+```
+Device ID   Local Intrfce  Capability  Platform  Port ID
+R2          Ser 0/1/0      R S I       ISR4221   Ser 0/1/0
+```
+
+> If CDP sees the device but ping fails, check Layer 3 configs.
+> 
+
+---
+
+### 16.2.3 Solve a Connectivity Problem (Step-by-Step)
+
+### Problem: PC1 cannot reach R3’s LAN.
+
+---
+
+**1. Ping from R1’s LAN to R3’s LAN:**
+
+```bash
+R1# ping 192.168.2.1 source g0/0/0
+```
+
+Result: **Fails** (0% success)
+
+---
+
+**2. Ping from R1 to R2's Serial link:**
+
+```bash
+R1# ping 172.16.2.2
+```
+
+Result: **Success** (5/5)
+
+---
+
+**3. Ping from R1 to R3’s LAN (without source):**
+
+```bash
+R1# ping 192.168.2.1
+```
+
+Result: **Success**
+
+Conclusion: R1 → R3 is reachable using the **Serial interface IP**.
+
+But PC1’s traffic (from R1’s LAN) can’t reach PC3 — there’s likely a **missing or wrong return route**.
+
+---
+
+**4. Check R2’s routing table:**
+
+```bash
+R2# show ip route
+```
+
+Findings:
+
+```
+S 172.16.3.0/24 [1/0] via 192.168.1.1 ❌
+```
+
+🔴 Problem: R2 sends 172.16.3.0/24 traffic to **192.168.1.1** (R3), not back to R1.
+
+---
+
+**5. Fix the static route on R2:**
+
+```bash
+R2(config)# no ip route 172.16.3.0 255.255.255.0 192.168.1.1
+R2(config)# ip route 172.16.3.0 255.255.255.0 172.16.2.1
+```
+
+---
+
+**6. Verify corrected route:**
+
+```bash
+R2# show ip route | begin Gateway
+```
+
+✅ New route:
+
+```
+S 172.16.3.0/24 [1/0] via 172.16.2.1
+```
+
+---
+
+**7. Ping R3 again from R1 (source from LAN):**
+
+```bash
+R1# ping 192.168.2.1 source g0/0/0
+```
+
+🎉 Result: **Success (5/5)**
+
+---
+
+## 16.3 Module Summary
+
+### Key Concepts Recap
+
+### Static Route Forwarding:
+
+1. Packet reaches R1.
+2. R1 uses default route to forward it to R2.
+3. R2 has a static route to destination → sends it to R3.
+4. R3 has connected route to PC3’s LAN.
+5. R3 uses **ARP** to find PC3 MAC → sends packet.
+
+---
+
+### Troubleshooting Tools:
+
+| Command | Use |
+| --- | --- |
+| `ping` | Checks reachability. |
+| `traceroute` | Shows packet path. |
+| `show ip route` | Verifies routing logic. |
+| `show ip interface brief` | Confirms interface status. |
+| `show cdp neighbors` | Checks physical Layer 1/2 links. |
