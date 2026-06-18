@@ -1,0 +1,284 @@
+RAID:
+Trin 1: Identificér diskene
+    Vis alle tilgængelige diske:
+        lsblk
+        Identificér de to tomme diske (fx /dev/sdb og /dev/sdc).
+        Vigtigt: Systemdisken (/dev/sda) må ikke anvendes.
+
+Trin 2: Opret partitioner på begge diske
+    Opret én partition, der fylder hele disken, på hver disk.
+    Eksempel for /dev/sdb:
+        sudo fdisk /dev/sdb
+
+        'n' for at tilføje en ny partition
+        'p' for at vølge primary partition type
+        '1' for at vælge mængden af partitions
+        '/n' for at vælge default
+        '/n' for at vælge default
+        't' for at skifte partition type
+        'fd' for at vælge Linux Raid Auto
+        'w' for at write ændringerne
+
+        'lsblk' for at verificere ændringerne
+
+Trin 3: Installer software RAID-værktøj
+    Installer mdadm:
+        sudo apt update && sudo apt upgrade
+        sudo apt install mdadm
+
+        bekræft installation:
+        mdadm --version
+
+Trin 4: Opret RAID 1-array
+    Opret RAID-arrayet:
+    sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 /dev/sdc1
+    
+    Syntax:
+    mdadm --create device --chunk=X --level=Y --raid-devices=Z devices
+
+    Bekræft oprettelsen:
+    cat /proc/mdstat
+
+Trin 5: Gem RAID-konfiguration
+    Gem konfigurationen, så arrayet genkendes efter genstart:
+        sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
+        --detail display the details of an array. Then tee copies the output and places it within the file
+
+        sudo update-initramfs -u
+        Updates existing initramfs
+
+Trin 6: Opret filsystem
+    Opret et ext4-filsystem på RAID-arrayet:
+        sudo mkfs.ext4 /dev/md0
+        laver en system fil i specificeret format i specificeret location
+
+Trin 7: Monter RAID-drevet
+    Opret mountpunkt:
+        sudo mkdir /mnt/raid1
+
+    Monter drevet:
+        sudo mount /dev/md0 /mnt/raid1
+        Mounter drevet md0 i specificeret location
+
+    Kontrollér:
+        df -h
+        Viser hvor meget plads der bliver brugt og hvor det bliver brugt    
+
+
+Trin 8: Automatisk montering ved opstart
+    Find UUID på RAID-arrayet:
+        sudo blkid /dev/md0
+        blkid locater/printer block device attributes
+
+    Redigér /etc/fstab
+        sudo nano /etc/fstab
+
+    Tilføj linjen (tilpas UUID):
+        UUID=a2b997e5-262f-4be4-998e-8254a8e74f3e /mnt/raid1 ext4 defaults 0 0
+
+    Test konfigurationen:
+        sudo umount /mnt/raid1
+        sudo mount -a
+
+Trin 9: Test funktion
+    Opret en testfil:
+        sudo touch /mnt/raid1/testfill.text
+        ls /mnt/raid1    
+
+
+Installation og konfiguration af OpenSSH SFTP på Ubuntu
+    Trin 1: Opdater pakkelisten
+        sudo apt update
+        Sikrer at systemet kneder de nyeste pakker og versioner fra Ubuntu-repositories
+
+Trin 2: Installer OpenSSH Server
+    sudo apt install openssh-server
+    Installerer SSH-serveren, som indeholder SFTP-funktionalitet som standard
+
+Trin 3: Kontroller at SSH-tjenesten kører
+    sudo systemctl status ssh
+    Bekræfter at SSH/SFTP-tjenesten er aktiv og klar til brug.
+
+Trin 4: Opret en SFTP-bruger
+    sudo adduser sftpuser
+    Opretter en lokal bruger, som senere bruges til SFTP-adgang.
+
+Trin 5: Opret mappe til SFTP-data
+    sudo mkdir -p /sftp/sftpuser/upload
+    Opretter en dedikeret mappestruktur til SFTP-brugeren.
+
+Trin 6: Sæt korrekte rettigheder
+    sudo chown root:root /sftp
+    sudo chown root:root /sftp/sftpuser
+    sudo chown sftpuser:sftpuser /sftp/sftpuser/upload
+    chmod 755 /sftp
+    chmod 755 /sftp/sftpuser
+
+    •Chroot kræver, at rodmappen ejes af root
+    •Brugeren får kun skriveadgang til upload-mappen
+
+Trin 7: Rediger SSH-konfiguration
+    sudo nano /etc/ssh/sshd_config
+    Tilføj nederst i filen:
+    Match User sftpuser
+        ChrootDirectory /sftp/sftpuser
+        ForceCommand internal-sftp
+        AllowTcpForwarding no
+        X11Forwarding no
+
+        •ChrootDirectory begrænser brugeren til én mappe
+        •internal-sftp tillader kun SFTP (ingen shell)
+        •TCP- og X11-forwarding deaktiveres af sikkerhedshensyn
+
+Trin 8: Genstart SSH-tjenesten
+    sudo systemctl restart ssh
+
+    Indlæser den nye konfiguration.
+
+Trin 9: Test SFTP-adgang
+    Fra en klient:
+        sftp sftpuser@server-ip
+
+        Bekræfter at brugeren kun har SFTP-adgang og er låst til sin mappe.
+
+Resultat
+•	OpenSSH SFTP er installeret
+•	Brugeren har sikker, isoleret SFTP-adgang
+•	Ingen shell-adgang eller adgang uden for chroot-mappen
+
+Trin 10: Opret SSH-nøgle på klienten
+    Kør på klientmaskinen:
+        ssh-keygen -t ed25519
+
+        Opretter et offentligt/privat nøglepar. ed25519 er hurtig og sikker.
+        Nøgler gemmes som standard i ~/.ssh/
+
+Trin 11: 
+    Overfør den offentlige nøgle til serveren
+        ssh-copy-id sftpuser@server-ip
+        
+        Kopierer den offentlige nøgle til serverens authorized_keys, så adgang kan ske uden password.
+        Men det fungere ikke
+        Tag nøglen og indskriv den inde i ftp brugerens home/.ssh/authorized_keys fil
+        Og sørg for at fstpuser har ejerskab. Ellers er der timer af smærte
+
+        sudo chown -R sftpuser:sftpuser /home/sftpuser/.ssh
+        sudo chmod 700 /home/sftpuser/.ssh
+        sudo chmod 600 /home/sftpuser/.ssh/authorized_keys
+
+Trin 12: Test login med nøgle
+    sftp sftpuser@server-ip
+    Bekræfter at SFTP-login fungerer uden brug af password.
+
+Trin 13: Deaktiver password-login (anbefalet)
+    På serveren, rediger SSH-konfigurationen:
+        sudo nano /etc/ssh/sshd_config
+        
+    Find og ret eller tilføj:
+        PasswordAuthentication no
+        PubkeyAuthentication yes
+    
+    Forklaring:
+        •	Forhindrer brute-force-angreb mod passwords
+        •	Tvinger brug af SSH-nøgler
+
+Trin 14: Genstart SSH-tjenesten
+    sudo systemctl restart ssh
+
+Forklaring:
+    Aktiverer de nye sikkerhedsindstillinger.
+
+Trin 15: Verificer at password-login er blokeret
+    Forsøg login fra en klient uden nøgle:
+        sftp sftpuser@server-ip
+    Forklaring:
+        Login skal nu afvises, hvis der ikke findes en gyldig SSH-nøgle.
+
+Trin 16: Find SSH/SFTP logfilen
+    På Ubuntu logges SSH og SFTP som standard i:
+        /var/log/auth.log
+    Forklaring:
+        Alle loginforsøg, nøgleautentificering og SFTP-sessioner registreres her.
+
+Trin 17: Se seneste SSH/SFTP loglinjer
+        sudo tail /var/log/auth.log
+    Forklaring:
+        Viser de nyeste hændelser, herunder succesfulde og afviste SFTP-forbindelser.
+
+Trin 18: Følg loggen i realtid
+    sudo tail -f /var/log/auth.log
+Forklaring:
+    Bruges til live-overvågning mens en bruger logger ind via SFTP.
+
+Trin 19: Filtrer kun SSH- og SFTP-relaterede hændelser
+    sudo grep sshd /var/log/auth.log
+Forklaring:
+    Viser kun linjer, der er genereret af SSH-serveren.
+
+Trin 20: Se loginforsøg for en specifik bruger
+sudo grep sftpuser /var/log/auth.log
+Forklaring:
+Giver overblik over alle SFTP-loginforsøg for den pågældende bruger.
+
+Trin 21: Identificer fejlede loginforsøg
+sudo grep "Failed" /var/log/auth.log
+Forklaring:
+Bruges til at opdage brute-force-forsøg eller fejlkonfiguration.
+
+Trin 22: Se succesfulde nøgle-login
+sudo grep "Accepted publickey" /var/log/auth.log
+Forklaring:
+Bekræfter at nøglebaseret autentificering anvendes korrekt.
+
+Trin 23: Brug journalctl (systemd-baseret)
+sudo journalctl -u ssh
+Forklaring:
+Viser SSH-logdata via systemd-journalen. Bruges på nyere Ubuntu-versioner.
+
+Trin 24: Overvåg kun SFTP-sessioner
+    sudo grep internal-sftp /var/log/auth.log
+Forklaring:
+Viser oprettelse og lukning af SFTP-sessioner.
+
+Resultat
+    •	Du kan identificere hvem der logger ind
+    •	Du kan se om login sker med nøgle eller password
+    •	Du kan opdage fejl og uautoriserede forsøg
+    •	Du kan overvåge SFTP-aktivitet i realtid
+
+Øvelse: Konfigurer NAT på Ubuntu
+Formål
+At konfigurere en Ubuntu-maskine til at fungere som NAT-router, så et internt netværk kan få adgang til internettet.
+Forudsætninger
+•	Ubuntu Server eller Desktop
+•	To netværksinterfaces
+o	Ét eksternt interface (forbundet til internet)
+o	Ét internt interface (forbundet til lokalt netværk)
+•	Root- eller sudo-adgang
+
+Trin 1: Identificer netværksinterfaces
+Find navnene på dine interfaces.
+    ip a
+Notér f.eks.:
+•	eth0 = internet (WAN)
+•	eth1 = internt netværk (LAN)
+
+Trin 2: Aktivér IP-forwarding
+    Redigér systemindstillinger:
+        sudo nano /etc/sysctl.conf
+    Find og aktivér:
+        net.ipv4.ip_forward=1
+    Anvend ændringen:
+        sudo sysctl -p
+
+Trin 3: Opsæt NAT med iptables
+    Erstat eth0 med dit internet-interface.
+        sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+        sudo iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+        sudo iptables -A FORWARD -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+Trin 4: Gør reglerne permanente
+    Installer værktøj til at gemme iptables-regler:
+        sudo apt install iptables-persistent
+        
+    Gem reglerne, når du bliver spurgt.

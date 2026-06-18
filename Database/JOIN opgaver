@@ -1,0 +1,46 @@
+INNER JOIN
+    Vis alle bøger sammen med deres forfatter (titel + forfatterens navn).
+    SELECT a.author_id, a.first_name, a.last_name, b.title FROM Authors a JOIN Books b ON b.author_id = a.author_id GROUP BY b.title, a.first_name, a.last_name; 
+    
+    Find alle lån og vis bogtitel + navnet på medlemmet der lånte den.
+    SELECT m.first_name, m.last_name, b.title FROM Loans l Join Members m ON l.member_id = m.member_id JOIN Books b ON l.book_id = b.book_id; 
+
+    Vis alle medlemmer og de bøger, de har lånt (fornavn, efternavn, titel).
+    SELECT m.first_name, m.last_name, b.title FROM Loans l Join Members m ON l.member_id = m.member_id JOIN Books b ON l.book_id = b.book_id; 
+
+LEFT JOIN
+    Vis alle forfattere og de bøger de har skrevet (også forfattere uden bøger).
+    SELECT a.author_id, a.first_name, a.last_name, b.title FROM Authors a LEFT JOIN Books b ON b.author_id = a.author_id ORDER BY a.author_id, a.first_name, a.last_name, b.title;
+
+    Vis alle bøger og deres lån (også bøger der aldrig er blevet lånt).
+    SELECT b.book_id, b.title, l.loan_date, l.book_id FROM Books b left JOIN Loans l ON l.book_id = b.book_id ORDER BY b.book_id, b.title, l.loan_date; 
+
+    Vis alle medlemmer og de bøger de har lånt (også medlemmer uden lån).
+    SELECT m.member_id, m.first_name, m.last_name, l.book_id FROM Members m LEFT JOIN Loans l ON l.member_id = m.member_id ORDER BY m.member_id, l.book_id, m.first_name, m.last_name; 
+
+RIGHT JOIN
+    Find alle bøger og deres forfattere, men brug en RIGHT JOIN.
+    SELECT b.book_id, b.title, a.author_id, a.first_name, a.last_name FROM Authors a RIGHT JOIN Books b ON b.author_id = a.author_id ORDER BY b.book_id; 
+
+    Find alle lån (loan_id, loan_date) og vis samtidig hvilken bogtitel de hører til.
+    SELECT l.loan_id, l.loan_date, b.title FROM Books b RIGHT JOIN Loans l ON l.book_id = b.book_id ORDER BY l.loan_id, l.loan_date; 
+
+Flere tabeller
+    Vis alle lån med: bogtitel, forfatterens efternavn og medlemmets fornavn.
+    SELECT l.loan_id, l.loan_date, b.title, a.first_name AS author_first_name, m.last_name AS member_last_name FROM Loans l LEFT JOIN Books b ON l.book_id = b.book_id LEFT JOIN Authors a ON b.author_id = a.author_id LEFT JOIN Members m ON l.member_id = m.member_id ORDER BY l.loan_date, l.loan_id; 
+
+    Find alle bøger af forfatteren "Jane Austen", som er blevet lånt ud (med låntagers navn).
+    SELECT b.book_id, b.title, l.loan_id, l.loan_date, m.first_name AS member_first_name, m.last_name AS member_last_name FROM Authors a JOIN Books b ON b.author_id = a.author_id JOIN Loans l ON l.book_id = b.book_id JOIN Members m ON m.member_id = l.member_id WHERE a.first_name = 'Jane' AND a.last_name = 'Austen' ORDER BY b.title, l.loan_date; 
+
+    Find alle medlemmer fra New York, og vis hvilke bøger de har lånt (hvis nogen).
+    SELECT m.first_name, m.last_name, m.city, b.title FROM Members m JOIN Loans l ON l.member_id = m.member_id JOIN Books b ON l.book_id = b.book_id WHERE m.city = "New York" ORDER BY b.title, m.first_name, m.last_name, m.city; 
+
+NULLFind alle bøger, som aldrig er blevet lånt.
+    Find alle medlemmer, som ikke har lånt nogen bøger endnu.
+    SELECT m.member_id, m.first_name, m.last_name FROM Members m LEFT JOIN Loans l ON l.member_id = m.member_id WHERE l.member_id IS NULL; 
+
+    Find alle lån, hvor return_date IS NULL (altså stadig ude hos medlemmet).
+    SELECT loan_id FROM `Loans` WHERE return_date IS NULL; 
+
+    Vis alle forfattere og deres bøger, men vis også forfattere som endnu ikke har nogen bøger i databasen.
+    SELECT a.author_id, a.first_name, a.last_name, b.title FROM Authors a LEFT JOIN Books b ON b.author_id = a.author_id ORDER BY b.title, a.first_name, a.last_name; 

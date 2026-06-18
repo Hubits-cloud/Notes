@@ -1,0 +1,89 @@
+Relevante links
+Der findes flere måder at hente sourcekode ned på Linux. I kommer til at bruge mindst en af
+disse metoder i opgaverne nedenfor.
+Git
+https://git-scm.com/docs
+https://www.atlassian.com/git/tutorials
+
+curl og wget
+https://curl.se/docs/tutorial.html
+https://www.gnu.org/software/wget/manual/
+
+!!!Det er værd at læse følgende!!!
+https://help.ubuntu.com/community/CompilingSoftware
+
+Jeres server mangler måske nogle tools til at lave opgaver:
+sudo apt install build-essential
+https://medium.com/@codewithadityajain/demystifying-development-a-guide-to-build-essential-in-ubuntu-for-seamless-software-compilation-b590b5a298bb
+
+Opgave 1
+Tetris!
+https://github.com/jserv/tetris
+● Hent sourcekoden
+    git clone https://github.com/jserv/tetris.git tetris
+
+● Byg Tetris
+    Vi manglede nogle værktøjer som vi installerede
+    sudo apt install build-essential
+    sudo apt install libncurses-dev
+    cd tetris
+    make
+
+● Kør og spil Tetris
+    ./tetris
+
+● Hvad er make, og hvorfor bruger man det i stedet for bare at kompilere hver fil
+manuelt?
+    Hvis en project har 200 .c filer, og du ændre 1. Ville man, når man manuelt kompiler, rekompile alle 200 filer, hvor make kun recompiler den ene
+
+Opgave 2
+Space invaders!
+I skal være opmærksomme, det er lidt anderledes end i opgave 1.
+https://github.com/doctorfree/ninvaders
+● Hent sourcekoden
+    git clone https://github.com/doctorfree/ninvaders.git spaceInvaders
+
+● Byg ninvaders
+    cd spaceInvaders
+    sudo apt install cmake
+    cmake -B cmake_build
+    cmake --build cmake_build -j2
+
+● Kør og spil ninvaders
+    cd cmake_build
+    ./ninvaders
+
+● Find ud af, hvilke dependencies programmet kræver
+    cmake
+    git
+
+
+Opgave 3
+Snake!
+https://github.com/akcyp/snake-cli
+● Hent sourcekoden
+    git clone https://github.com/akcyp/snake-cli.git snake
+
+● Byg snake!
+    sudo npm i snake-cli-ts -g
+    snake
+
+● Hvad er det for noget med npm han snakker om i readme?
+    Det er lige som apt og pip, men bare for js eller typescript
+
+
+Opgave 4
+Denne opgaver er måske lidt svær at løse, men læst dokumentation i github link og giv det
+et forsøg! Dette kan ikke kører på jeres server, Windows Subsystem Linux (WSL) er måske
+en mulighed.
+https://github.com/BZFlag-Dev/bzflag
+Links
+https://opensource.com/article/18/1/how-install-apps-linux
+https://opensource.com/article/19/7/introduction-gnu-autotools
+
+    apt install g++ automake autoconf libtool make libc-ares-dev libcurl3-dev libglew-dev libncurses-dev libsdl2-dev zlib1g-dev libglm-dev libpng-dev 
+    git clone --branch master https://github.com/BZFlag-Dev/bzflag.git 
+    cd bzflag
+    ./autogen.sh 
+    ./configure 
+    make -j$(nproc --ignore=2)

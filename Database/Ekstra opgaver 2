@@ -1,0 +1,53 @@
+
+Database: Library
+Spørgsmål: Lav en liste af bøger, med title og publisher name, hvor at publisher er fra london og bøgens title starter med ”Harry”.
+SELECT b.title, p.name, p.city FROM Books b JOIN Book_Publishers bp ON b.book_id = bp.book_id JOIN Publishers p ON bp.publisher_id = p.publisher_id WHERE p.city = "London" AND b.title LIKE "Harry%" ORDER BY b.title, p.name; 
+
+Database: Library
+Spørgsmål: Hvis medlems navn og by HVIS de har en resevation hvor at bogens publishers navn indeholder ”Press” og medlemmet navn indeholder ”e”.
+SELECT DISTINCT CONCAT(m.first_name, ' ', m.last_name) AS member_name, m.city FROM Members m JOIN Reservations r ON r.member_id = m.member_id JOIN Books b ON b.book_id = r.book_id JOIN Book_Publishers bp ON bp.book_id = b.book_id JOIN Publishers p ON p.publisher_id = bp.publisher_id WHERE p.name LIKE '%Press%' AND CONCAT(m.first_name, ' ', m.last_name) LIKE '%e%' ORDER BY m.first_name, m.last_name; 
+
+Database: Library
+Spørgsmål: Lav en liste af alle bøger, dens forfatter og title, som starter med ”the” og ikke har en publisher.
+SELECT b.book_id, b.title, COALESCE(CONCAT(a.first_name, ' ', a.last_name), 'No Author') AS author_name FROM Books b LEFT JOIN Authors a ON a.author_id = b.author_id LEFT JOIN Book_Publishers bp ON bp.book_id = b.book_id WHERE LOWER(b.title) LIKE 'the%' AND bp.publisher_id IS NULL ORDER BY b.title; 
+
+Database: Library
+Spørgsmål: lav en liste af alle authors, med kun deres fornavn og sidste navn.
+SELECT first_name, last_name FROM `Authors`; 
+ 
+Database: Library
+Spørgsmål: Lav en list eaf alle medlemmer som bor i en by som starter med ”N”
+SELECT first_name, last_name FROM `Members` WHERE city LIKE "N%"; 
+
+Database: Library
+Spørgsmål: Lav en liste af alle fantasy bøger.
+SELECT title FROM `Books` WHERE genre = "fantasy"; 
+
+
+Database: Library
+Spørgsmål: Lav en liste af alle forfatter og de bøger de har udgivet.
+SELECT a.first_name, a.last_name, b.title FROM Authors a JOIN Books b ON a.author_id = b.author_id ORDER BY a.first_name, a.last_name, b.title; 
+
+Database: Library
+Spørgsmål: Lav en liste af all bøger uden en forfatter.
+SELECT title FROM `Books` WHERE author_id IS NULL; 
+
+Database: Library
+Spørgsmål: Lav en liste af alle bøger som er lånt og hvem der har lånt dem.
+SELECT b.title, m.first_name, m.last_name FROM Books b JOIN Loans l ON b.book_id = l.book_id JOIN Members m ON l.member_id = m.member_id ORDER BY b.title, m.first_name, m.last_name; 
+
+Database: Library
+Spørgsmål: Hvis alle publishers som har kontor i London.
+SELECT name FROM `Publishers` WHERE city = "London"; 
+
+Database: Library
+Spørgsmål: Lav en liste af all bøger og deres publishers, SAMT dem der ikke har en publisher.
+SELECT b.title, p.name FROM Books b LEFT JOIN Book_Publishers bp ON b.book_id = bp.book_id LEFT JOIN Publishers p ON bp.publisher_id = p.publisher_id ORDER BY b.title, p.name; 
+
+Database: Library
+Spørgsmål: Find alle medlemmer som har en bøg der ikke er afleveret tilbage.
+SELECT m.first_name, m.last_name FROM Members m RIGHT JOIN Loans l ON m.member_id = l.member_id WHERE l.return_date IS NULL; 
+
+Database: Library
+Spørgsmål: Hvis resevationer for bøger som er udgivet af en publisher fra London
+SELECT r.reservation_id FROM Reservations r JOIN Books b ON r.book_id = b.book_id JOIN Book_Publishers bp ON b.book_id = bp.book_id JOIN Publishers p ON bp.publisher_id = p.publisher_id WHERE p.city = "London"; 

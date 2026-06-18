@@ -1,0 +1,148 @@
+Dag 2 opgaver:
+
+Opgave 1
+
+* opret bruger manuelt
+* sæt adgangskode for bruger
+* Bruger skal kunne logge ind via SSH
+* bruger må ikke være root
+* opret fælles gruppe
+* tilføj alle brugere til gruppen
+
+*useradd, passwd, id, groups, who ami
+
+Opret bruger manuelt: sudo useradd Ben
+
+sudo passwd Ben 
+Kode1234!
+
+getent passwd Ben
+
+Tjek for /bin/bash /bin/sh /bin/zsh
+
+hvis shell er /usr/sbin/nologin eller /bin/false skift via:
+
+sudo usermod -s /bin/bash Ben
+
+Tilføj bruger til allowedusers i sshd.config for at de kan bruge SSH, (lav eventuelt ny alloweduser)
+
+sudo groupadd FællesBen
+
+sudo visudo kan bruges til at tilføje brugere til sudo gruppen NOPASSWD = ALL kan bruges så 
+password ikke er et krav.
+
+usermod -s /bin/bash <brugernavn> = bruges til at skifte til bash shell.
+
+Opgave 2:
+
+Hvad gør sudo: Sudo tillader ikke root users at køre kommandoer med root tilladelser uden at skifte konto.
+
+Hvorfor er root dårlig ide til SSH:
+Det er en dårlig ide at tillade SSH forbindelse gennem root, da det ville give en skrøbelighed 
+og ville betyde 
+at en potentiel hacker kan danne en remote forbindelse gennem root og have forhøjede privilegier 
+som kan udnyttes
+i meget høj grad til at komprimere hele systemet hvis ikke flere systemer i ens infrastruktur. 
+
+Opgave 3: 
+
+sudo group add Hold (Laver en fælles gruppe kaldet Hold)
+
+mkdir /home/Ben/FællesBen (Laver en Directory under /home/Ben kaldet FællesBen)
+
+sudo chmod g+rw /home/Ben/FællesBen (Giver gruppen Read + write oven på hvad gruppen allerede havde i folderen).
+= giver præcist, - fjerner. 
+
+sudo chmod Hold 760 (Giver Hold Read write og owner Read write execute, andre har ikke adgang).
+
+r = read, w = write, x = execute.
+
+Bruger = Owner, personen som ejer filen.
+
+Gruppe = Gruppen tilhørende filen.
+
+Andre = andre brugere.
+
+7 = rwx
+5 = r-x
+4 = --x
+3 = rw-
+2 = -w-
+1 = r--
+0 = ---
+
+Opgave 4:
+
+ps -a finder alle aktive processer.
+
+Sleep får processer eller instances osv til at sove i en angivet mængde tid.
+
+ps -u <user> viser processer som er kørende fra den specifikke bruger.
+
+sudo apt-get install htop (installerer htop)
+
+
+
+Program er statisk kode som er gemt på en disk, for eksempel /usr/bin/ssh, /bin/ls, python3, nginx osv.
+Det er noget som kan blive kørt men som ikke nødvendigvis er kørende.
+
+Process er en kørende instance af et program.
+Når et program køres, laver OS en process med PID (process id).
+der kan være flere adskillige processer som stammer fra samme programmer.
+
+Service det er started eller stoppet såvel som overvåget af OS service manager såsom systemd på UBUNTU.
+Det er en task som kører i baggrunden.
+Det er hvad systemet holder kørende og kontrollerer.
+
+Opgave 5:
+
+Find SSH-servicen:
+
+sudo systemctl status ssh eller sudo service ssh status.
+
+Se status:
+
+sudo service ssh status.
+
+stop og start:
+sudo systemctl stop ssh
+sudo systemctl status ssh
+sudo service ssh start
+sudo systemctl start ssh
+sudo systemctl enable ssh
+
+Opgave 6:
+
+Last & who læser login accounting databaser.
+
+Last samler en historik af login sessioner såsom brugernavn, terminal, source ip/host, login tid
+logout tid.
+
+data kommer fra /var/log/wtmp som er historiske logins, det viser også system boots via last reboot.
+
+last indeholder fuldførte sessionser, ssh login sessioner dukker op som "pts/N" med en remote host/IP
+
+Who viser hvem er logget ind lige nu, den viser bruger navn, terminal (tty/pts), login tid.
+Det kommer fra /run/utmp eller /var/run/utmp
+viser kun de nuværende sessioner.
+Kan også vise SSH sessioner, såsom <bruger pts/0 .... (1.2.3.4)
+Brugt til console logins og andre session typer også.
+
+
+
+journalctl:
+Entries fra systemd jounrla.
+
+inderholder
+service logs (sshd, sudo, cron, etc)
+kernel beskeder
+boot logs
+authenticerings relaterede logs.
+
+Kommer fra /var/log/journal (persistent forbliver selv efter reboot)
+eller /run/log/journal (volatilt, er i hukommelse indtil reboot)
+
+Indeholder successfulde eller fejlede SSH forsøg,
+sudo forbrug.
+Service start/stop.
+Fejl, anmeldelser, kernel events.

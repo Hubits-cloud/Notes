@@ -1,0 +1,47 @@
+Opgave 1
+Vælg en get command og brug Get-Help til at undersøge hvad den gør, forsøg dig med -
+Eksample parameter og se hvad det gør.
+
+NAME
+    Get-Certificate
+SYNOPSIS
+    Submits a certificate request to an enrollment server and installs the response or retrieves a certificate for a previously submitted request.
+
+
+Opgave 2
+Find alle kørende services:
+● Get-Service | Where-Object Status -eq "Running"
+    ○ Undersøg hvad -eq betyder.
+    eq betyder equals
+
+Hvis kun navn og status
+● Get-Service | Select-Object Name,Status
+
+Find hvad Alias er for ls og dir.
+● Get-Alias
+    ls -> Get-ChildItem
+    dir -> Get-ChildItem
+
+Opgave 3
+Find jeres execution policy med: Get-ExecutionPolicy -List
+● Hvad er execution policy?
+PowerShell's execution policy is a safety feature that controls the conditions under which PowerShell loads configuration files and runs scripts. This feature helps prevent the execution of malicious scripts.
+
+
+opret en mappe, f.eks. c:/test og så kør Remove-Item C:\Test -WhatIf
+● Hvad gør -Whatif ?
+Fortæller us hvad scriptet gør
+
+Opgave 4
+start et transcript
+Start-Transcript -Path C:\Logs\session.txt
+kør cmdlets efter eget valg og så skriv
+Stop-Transcript
+● Undersøg hvad der er skrevet i session.txt
+    Det er logs. De skriver hvad jeg lavede
+
+Opgave 5
+Export data som en CSV fil.
+Get-Service |
+Select-Object Name,Status |
+Export-Csv C:\services.csv -NoTypeInformation

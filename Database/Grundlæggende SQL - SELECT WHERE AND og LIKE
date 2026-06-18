@@ -1,0 +1,55 @@
+Grundlæggende SELECT
+	Vis alle kolonner fra tabellen students.
+    SELECT * FROM `Students`; 
+
+	Vis kun first_name og last_name for alle studerende.
+    SELECT first_name, last_name FROM `Students`; 
+
+	Vis course_name for alle kurser i tabellen courses.
+    SELECT course_name FROM `Courses`;
+
+WHERE-betingelser
+	Find alle studerende, der bor i New York.
+    SELECT first_name, last_name FROM `Students` WHERE city='New York'; 
+
+	Vis studerende, der er 22 år gamle.
+    SELECT first_name, last_name FROM `Students` WHERE age=22; 
+
+	Vis kurser, der hører til afdelingen Mathematics.
+    SELECT course_name FROM `Courses` WHERE department='Mathematics'; 
+
+Sammenligninger og AND
+	Vis alle studerende, der er ældre end 21.
+    SELECT first_name, last_name FROM `Students` WHERE age > 21; 
+
+	Vis studerende, der er fra Chicago OG ældre end 22.
+    SELECT first_name, last_name FROM `Students` WHERE city='Chicago' AND age > 22; 
+
+	Vis studerende, der er fra Los Angeles ELLER Phoenix.
+    SELECT first_name, last_name FROM `Students` WHERE city='Los Angeles' OR city='Pheonix'; 
+
+Wildcards (LIKE)
+	Vis studerende, hvis fornavn starter med "A".
+    SELECT first_name, last_name FROM `Students` WHERE first_name LIKE '%A'; 
+
+	Vis studerende, hvis efternavn slutter med "son".
+    SELECT first_name, last_name FROM `Students` WHERE last_name LIKE '%son';
+
+	Vis studerende, hvis email indeholder "example".
+    SELECT first_name, last_name FROM `Students` WHERE email LIKE '%example%'; 
+
+	Vis studerende, hvis fornavn indeholder "an" et hvilket som helst sted (f.eks. Hannah Diana).
+    SELECT first_name, last_name FROM `Students` WHERE first_name LIKE '%an%'; 
+
+	Vis kurser, hvor course_name indeholder "Systems".
+    SELECT course_name FROM `Courses` WHERE course_name LIKE '%Systems%'; 
+
+Kombination af WHERE, AND, LIKE
+	Vis studerende, der bor i New York OG hvis fornavn starter med "A".
+    SELECT first_name, last_name FROM `Students` WHERE city = 'New York' AND first_name LIKE 'A%'; 
+
+	Vis studerende, der er under 22 år OG har "n" i deres efternavn.
+    SELECT first_name, last_name FROM `Students` WHERE age < 22 AND last_name LIKE '%n%'; 
+
+	Vis studerende, hvis e-mail slutter med ".com" OG by er Chicago.
+    SELECT first_name, last_name FROM `Students` WHERE email LIKE '%.com' AND city = 'Chicago'; 

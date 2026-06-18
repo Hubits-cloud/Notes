@@ -1,0 +1,173 @@
+Opgave 1
+I skal sikre jeres control node, ved at sikre at der kun er 1 bruger som kan køre ansible.
+Samt sikre at det kun er den bruger som kan tilgå folders osv. hvor Ansible playbooks,
+inventory osv lægger.
+Husk chmod/chown fra linux (chmod -R 700 . og husk ls -la for at se rettigheder)
+chmod(1) - Linux manual page
+    ● Identificere hvilken bruger der skal være Ansible user
+    Det bliver tobias
+
+    ● Sikre ejerskab (chown) af Ansible-mappen
+    ls -l viser hvem der eger den, og det gør tobias
+
+    ● Sikre rettigheder (chmod), så kun ejeren har adgang
+    chmod 700 ansible-lab. Denne kommando giver den nuværende bruger (tobias) rwx, mens alle andre grupper og brugere får ingen rettigheder.
+
+    ● Gøre det samme for ssh mappen (SSH keys)
+    chown tobias .ssh. Det giver bruger tobias de eneste rettigheder til denne fil.
+
+Opgave 2
+vi vil også gerne være sikker på vores Ansible logs, sørg for at I gemmer jeres logs.
+Logging Ansible output — Ansible Community Documentation
+    ● Find ud af hvor Ansible logger kan konfigureres
+    Det kan gøres inde i ansible.cfg ved at specificere en log_path
+
+    ● Opsæt logging til en fil (fx /var/log/ansible.log)
+    Først definere vi stien inde i ansible.cfg, derefter laver vi filen ved at køre
+    sudo touch /var/log/ansible.log
+
+    ● Sikr at kun root/ansible-bruger kan læse loggen
+    Først skal vi lave en gruppe med både tobias og root i så de kan læse log filerne.
+    sudo groupadd logreaders
+    Nu skal vi tilføje dem.
+    sudo usermod -aG logreaders tobias
+    sudo usermod -aG logreaders root
+    Nu ændre vi log filens gruppe til at være logreaders
+    sudo chgrp logreaders /var/log/ansible.log
+    Og til sidst skifter vi ownership til at eger kan læse og skrive, group kan læse og
+    alle andre kan intet
+    sudo chmod 640 /var/log/ansible.log
+
+    Derudover Husk firewall (UFW), fjern alle application/packges som ikke er nødvendige.
+    Først skal vi installere UFW
+    sudo apt update && sudo apt upgrade
+    sudo apt install ufw
+    Nu ville vi gerne tillade outbound og stoppe inbound traffik
+    sudo ufw default deny incoming
+    sudo ufw default allow outgoing
+    Vi skal også huske at give os selv adgang gennem ssh
+    sudo ufw allow OpenSSH
+    Nu kan vi starte firewallen
+    sudo ufw enable
+    Hvis nødvendigt ville du kunne køre:
+    sudo ufw status verbose
+    sudo ufw status numbered
+    for at se dine configurationer
+
+    
+    Optsæt AppArmor.
+    sudo apt install apparmor apparmor-utils
+
+
+Opgave 3
+Sikre at i ikke SSH som root, samt sikre at SSH kun bruger keys og ikke passwords. Check
+jeres sshd config efter: PasswordAuthentication.
+    1. Gennemgå /etc/ssh/sshd_config
+    2. Identificere relevante indstillinger
+    3. Dokumentere hvad de betyder
+    Specifikke indstillinger at finde:
+    ● PermitRootLogin
+    ● PasswordAuthentication
+    ● PubkeyAuthentication
+
+    Vi kopiere vores public key ind på authorized_keys inde under brugeren.
+    Derefter går vi ind i config
+    sudo nano /etc/ssh/sshd_config
+    og her sætter vi pubjeyauthentication on, stopper PasswordAuthentication og denier root login
+
+Opgave 4
+Opsætning af Ansible Vault.
+
+    Oprette en Vault-fil
+    Vi kører bare: ansible-vault create group_vars/all/vault.yml
+    Den ville bede om en vault kode, der bruger vi bare Kode1234! igen.
+
+    Gemme mindst en secret (fx password eller token)
+    Når du er kommet ind i vim terminal (oh god)
+    skrive disse kommandoer
+    vault_db_password: "supersecret"
+    vault_api_token: "abcd..."
+    og derefter gem og gå ud
+
+    Bruge Vault-filen i et playbook
+    Vi laver en playbook der hedder vaultplay.yml og indsætter dette
+    - hosts: all
+    vars_files:
+    - group_vars/all/vault.yml
+    tasks:
+    - name: Example
+      ansible.builtin.debug:
+        msg: "DB pass is {{ vault_db_password }}"
+
+
+Forklare forskellen på:
+    ● encrypted vars
+    De er normale ansible variabler, men de er gemt via vault for at undå at leake 
+    følsom data så de ikke kan ses
+
+    ● vault password file
+    Vault password filen er en fil som ansible læser for at få ansible vault decyption nøglen
+    so du ikke behøver at bruge --ask-vault-pass hver gang.
+
+    ● --ask-vault-pass
+    Detter er en ansible playbook command line option der ber ansible om at spørge os om
+    asnible vault password så den kan blive brugt
+
+Opgave 5
+
+Undersøg dette link og playbooks.
+Forklare hvad “security hardening” betyder
+    Security hardening er navnet på den praksis at sikre ens server for angreb. Uanset
+    om det er gennem ssh eller en anden protocol
+
+Identificere mindst 3 ting, playbooks forsøger at sikre
+    SSH, User access, og Kernel
+
+Forklare hvorfor automatiseret hardening er bedre end manuel
+    Det gør det lettere og hurtigere at implementere på et helt netværk af servere
+
+
+Overordnede krav
+I skal levere:
+    1. Et struktureret Ansible-projekt
+    Et eller flere playbooks
+
+    2. Brug af:
+    ○ inventories
+    ○ roles
+    ○ handlers
+    ○ Ansible Vault
+
+    3. Dokumentation af hvad I sikrer og hvorfor
+
+ansible-lab/
+├─ ansible.cfg
+├─ inventory/
+│  ├─ inventory.ini
+│  └─ group_vars/
+│     ├─ all.yml
+│     ├─ nodes.yml
+│     └─ webservers.yml
+├─ playbooks/
+│  ├─ site.yml
+│  ├─ users.yml
+│  └─ webserver.yml
+├─ roles/
+│  ├─ common/
+│  │  ├─ tasks/main.yml
+│  │  └─ handlers/main.yml
+│  ├─ users/
+│  │  ├─ tasks/main.yml
+│  │  └─ defaults/main.yml
+│  └─ webserver/
+│     ├─ tasks/main.yml
+│     ├─ handlers/main.yml
+│     ├─ templates/index.html.j2
+│     └─ vars/main.yml
+└─ vault/
+   └─ secrets.yml   (encrypted)
+Dir Opsætning
+
+De sikkerheds valg vi har taget er blandt andet at gemme de nye users password inde i secrets.yml
+og at vi har slukket for logs fra ansible. Vi gør dette for at undgå at en
+unauthorized user for adgang til data de ikke må se

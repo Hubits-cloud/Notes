@@ -1,0 +1,39 @@
+1.
+    Database: library_db
+    Spørgsmål: Find alle forfatter fra England hvis sidste navn starter med ”A”.
+    SELECT first_name, last_name FROM `Authors` WHERE country = "UK" AND last_name LIKE "A%"; 
+2.
+    Database: library_db
+    Spørgsmål: Find alle bøger med ”Harry” i titlen og deres forfatter.
+    SELECT b.title, a.first_name, a.last_name FROM Books b JOIN Authors a ON b.author_id = a.author_id WHERE b.title LIKE "%Harry%" ORDER BY b.title, a.first_name, a.last_name; 
+3.
+    Database: library_db
+    Spørgsmål: Find alle bøger i genren ”Romance” og deres forfatter.
+    SELECT b.title, b.genre, a.first_name, a.last_name FROM Books b JOIN Authors a ON b.author_id = a.author_id WHERE b.genre = "Romance" ORDER BY b.title, a.first_name, a.last_name; 
+4.
+    Database: library_db
+    Spørgsmål: Find alle bøger som er lånt ud af en person hvis efternavn indeholder ”o”
+    SELECT m.first_name, m.last_name, b.title FROM Members m JOIN Loans l ON m.member_id = l.member_id JOIN Books b ON l.book_id = b.book_id WHERE m.last_name LIKE "%o%" ORDER BY b.title, m.first_name, m.last_name; 
+5.
+    Database: library_db
+    Spørgsmål: Find alle forfattere fra England hvor der er et ”and” i titlen, tæl antal bøger hver forfatter har udgivet og sorter dem højest til lavest.
+    SELECT a.first_name, a.last_name, b.title FROM Authors a JOIN Books b ON b.author_id = a.author_id WHERE b.title LIKE '%and%' AND a.country = 'UK' ORDER BY b.title, a.first_name, a.last_name; 
+    SELECT a.author_id, a.first_name, a.last_name, COUNT(b.book_id) AS total_books FROM Authors a LEFT JOIN Books b ON b.author_id = a.author_id GROUP BY a.author_id, a.first_name, a.last_name ORDER BY total_books DESC, a.last_name, a.first_name; 
+6. 
+    Database: library_db
+    Spørgsmål: Find alle forfatter hvis bøger aldrig er blevet lånt.
+    SELECT a.author_id, a.first_name, a.last_name FROM Authors a WHERE NOT EXISTS ( SELECT 1 FROM Books b JOIN Loans l ON l.book_id = b.book_id WHERE b.author_id = a.author_id ); 
+7.
+    Database: library_db
+    Spørgsmål: Find alle forfatter som opfylder 1 af følgende krav. 1) De har en bog med ”and” i titlen som IKKE er afleveret tilbage, ELLER 2) De er fra USA og ingen har lånt deres bøger.
+    SELECT DISTINCT a.first_name, a.last_name FROM Authors a WHERE EXISTS ( SELECT 1 FROM Books b JOIN Loans l ON l.book_id = b.book_id WHERE b.author_id = a.author_id AND b.title LIKE '%and%' AND l.return_date IS NULL ) OR ( a.country = 'USA' AND NOT EXISTS ( SELECT 1 FROM Books b JOIN Loans l ON l.book_id = b.book_id WHERE b.author_id = a.author_id ) ); 
+8.
+    Database: library_db
+    Spørgsmål: Find medlemmer som er fra en by der indeholder ”o” og har lånt mindst 1 title som indeholder ”and” og ALDRIG har lånt en bog fra en forfatter der er fra ”uk”.
+    SELECT DISTINCT m.member_id, m.first_name, m.last_name, m.city FROM Members m WHERE LOWER(m.city) LIKE '%o%' AND EXISTS ( SELECT 1 FROM Loans l JOIN Books b ON b.book_id = l.book_id WHERE l.member_id = m.member_id AND LOWER(b.title) LIKE '%and%' ) AND NOT EXISTS ( SELECT 1 FROM Loans l JOIN Books b ON b.book_id = l.book_id JOIN Authors a ON a.author_id = b.author_id WHERE l.member_id = m.member_id AND LOWER(a.country) = 'uk' ); 
+9.
+    Database: library_db
+    Spørgsmål: Find alle bøger som starter med ”the” some aldrig har været udlånt, også bøger uden en forfatter. Hvis der ikke er nogen forfatter så skal der stå ”No Author”.
+    SELECT b.book_id, b.title, COALESCE(CONCAT(a.first_name, ' ', a.last_name), 'No Author') AS author_name FROM Books b LEFT JOIN Authors a ON a.author_id = b.author_id WHERE LOWER(b.title) LIKE 'the%' AND NOT EXISTS ( SELECT 1 FROM Loans l WHERE l.book_id = b.book_id ) ORDER BY b.title; 
+https://mariadb.com/docs/server/reference/sql-structure/operators/comparison-operators/coalesce
+Måske: https://mariadb.com/docs/server/reference/sql-functions/string-functions/concat

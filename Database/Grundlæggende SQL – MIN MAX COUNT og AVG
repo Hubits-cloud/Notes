@@ -1,0 +1,57 @@
+Grundlæggende brug af aggregatfunktioner
+	Find den laveste løn blandt alle medarbejdere.
+    SELECT first_name, last_name FROM `Employees` WHERE salary = (SELECT MIN(salary) FROM `Employees`); 
+
+	Find den højeste løn blandt alle medarbejdere.
+    SELECT first_name, last_name FROM `Employees` WHERE salary = (SELECT MAX(salary) FROM `Employees`); 
+
+	Find den gennemsnitlige løn for alle medarbejdere.
+    SELECT AVG(salary) AS avg_salary FROM `Employees`; 
+
+	Tæl det samlede antal medarbejdere i virksomheden.
+    SELECT COUNT(first_name) FROM `Employees`; 
+
+	Find den samlede sum af alle lønninger, der er udbetalt til medarbejdere.
+    SELECT SUM(salary) as total_payroll FROM `Employees`; 
+
+Aggregater på tabellen sales
+	Find det laveste salgsbeløb i tabellen sales.
+    SELECT sale_id, amount FROM `Sales` WHERE amount = (SELECT MIN(amount) FROM `Sales`); 
+
+	Find det højeste salgsbeløb i tabellen sales.
+    SELECT sale_id, amount FROM `Sales` WHERE amount = (SELECT MAX(amount) FROM `Sales`); 
+
+	Find det samlede salgsbeløb, der er registreret i virksomheden.
+    SELECT SUM(amount) AS sum_amount FROM `Sales`;
+
+	Find det gennemsnitlige salgsbeløb på tværs af alle transaktioner.
+    SELECT AVG(amount) AS avg_amount FROM `Sales`;
+
+	Tæl det samlede antal salgstransaktioner.
+    SELECT SUM(sale_id) AS sale_amount FROM `Sales`; 
+
+Aggregater med GROUP BY (pr. medarbejder)
+	Find det samlede salgsbeløb for hver medarbejder.
+    SELECT e.employee_id, e.first_name, e.last_name, SUM(s.amount) AS sale_amount FROM Employees e JOIN Sales s ON s.employee_id = e.employee_id GROUP BY e.employee_id, e.first_name, e.last_name; 
+	
+    Find antallet af salgstransaktioner for hver medarbejder.
+    SELECT e.employee_id, e.first_name, e.last_name, COUNT(s.employee_id) AS sale_count FROM Employees e JOIN Sales s ON s.employee_id = e.employee_id GROUP BY e.employee_id, e.first_name, e.last_name; 
+
+	Find det gennemsnitlige salgsbeløb pr. medarbejder.
+    SELECT e.employee_id, e.first_name, e.last_name, AVG(s.amount) AS avg_amount FROM Employees e JOIN Sales s ON s.employee_id = e.employee_id GROUP BY e.employee_id, e.first_name, e.last_name; 
+
+	Find det største enkelte salg for hver medarbejder.
+    SELECT e.employee_id, e.first_name, e.last_name, MAX(s.amount) AS max_amount FROM Employees e JOIN Sales s ON s.employee_id = e.employee_id GROUP BY e.employee_id, e.first_name, e.last_name; 
+
+	Find det mindste enkelte salg for hver medarbejder.
+    SELECT e.employee_id, e.first_name, e.last_name, MIN(s.amount) AS min_sale FROM Employees e JOIN Sales s ON s.employee_id = e.employee_id GROUP BY e.employee_id, e.first_name, e.last_name; 
+
+Aggregater med GROUP BY (pr. afdeling)
+	Find den gennemsnitlige løn for medarbejdere i hver afdeling.
+    SELECT department, AVG(salary) AS avg_salary FROM Employees GROUP BY department; 
+
+	Find den højeste løn i hver afdeling.
+    SELECT department, MAX(salary) AS max_salary FROM Employees GROUP BY department; 
+
+	Tæl antallet af medarbejdere i hver afdeling.
+    SELECT department, count(employee_id) AS employee_count FROM Employees GROUP BY department; 

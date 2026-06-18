@@ -1,0 +1,220 @@
+Opgave 1:
+
+uname -r 
+uname -a
+
+Kan bruges til at finde systemets arkitektur & kernel-versionen som er kørende på enheden.
+
+ls -ld /sys/firmware/efi kan bruges til at finde ud af om det er UEFI eller BIOS som er kørende.
+
+Hvis /efi findes er det UEFI, hvis ikke er det BIOS. 
+
+[ -d /sys/firmware/efi ] && echo UEFI || echo BIOS
+
+Kan bruges for at være sikker, det vil printe ud om det er BIOS eller UEFI.
+
+[ -d /sys/firmware/efi ] 
+
+-d /sys/firmware/efi spørger om den sti findes, hvis test lykkes så echo UEFI eller echo BIOS.
+[] betyder at test benyttes, hvad enden er inde i "[]" er bare en "test" så det kan også skrives
+-> test -d /sys/firmware/efi
+
+Hvorfor det er vigtigt at vide om noget er BIOS eller UEFI:
+
+BIOS læser MBR (booter kode i MBR/BIOS boot area)
+
+UEFI læser folder ( EFI loader i /boot/efi/EFI/ubuntu) GRUB config & moduler er stadigvæk i /boot/grub som regelt.
+
+Svarende er:
+6.8.90-generic
+x86_64
+BIOS
+
+lscpu 
+
+lsusb 
+
+Opgave 2:
+
+grub-install --version kan bruges til at finde GRUB version.
+
+GRUB konfigurations filer ligger i /boot/grub/grub.cfg
+
+/etc/default/grub påvirker hvordan menuen genereres.
+
+Opgave 3:
+
+Kan løses ved at gå ind i /etc/default/grub og så ændre GRUB_TIMEOUT i grub filen.
+
+cd /etc/default/grub 
+sudo nano grub
+
+sudo update-grub kan derefter bruges til at opdatere grub.
+
+Ændringer kan bekræftes ved at bruge sudo grep timeout /boot/grub/grub.cfg 
+
+Opgave 4:
+
+Der sker ingen ændringer til grub-menuen efter systemopdateringer.
+
+Der skal køres kommandoen update-grub som root/sudo privilegier for at ændringer også sker til GRUB 2 menuen.
+
+Opgave 5:
+Reboot maskinen hold shift gå ind i advanced grub options og klik e på den kernel som du vil ind og kigge på.
+
+Den aktive kernel vises såvel som installerede kernel-images. 
+
+Efter man trykker e på den kernel som der undersøges, kan man se det image som er tilhørende initrd (i bunden).
+
+Opave 6:
+
+sudo update-initramfs -u -k "$(uname -r)"
+
+virker også med sudo update-initramfs -c -k "$(uname -r)"
+
+Genererer en ny initramfs til den kørende kernel.
+
+derefter kan det bekræftes at filen er blevet opdateret 
+med "ls -l /boot/initrd.img-"$(uname -r)"
+
+vær opmærksom på UTC, kan godt være en time bagud osv.
+
+Reboot kræves ikke for at bekræfte ændringen er foretaget. 
+
+initial RAM disk, midlertidig in-memory fil system i Linux boot process som bygger broen
+mellem kernel loading og main root file system.
+
+Opgave 7:
+
+Vi skal:
+Vise alle indlæste kernelmoduler
+
+-> lsmod kan bruges her
+-> lsusb kan også bruges til at tjekke for usb enheder.
+
+/etc/modules konfigurere hvilke loadable modules er automatisk loaded.
+/etc/modules kan ændres så at en modul bliver automatisk loaded.
+
+
+Undersøge modulet: usb_storage
+
+usb_storage er den Kernel driver som tillader OS at "recognize", mount og agere
+
+med USB enheder såsom flash drives, external hard drives, card readers osv.
+
+Dette modul loades automatisk når en enhed som er kompatibel indsættes i enheden.
+
+usb-storage indlæses som regelt ikke by default, det er ikke altid tilstedeværende.
+usb-storage er enabled by default og auto-loaded i tilfælde af en kompatibel 
+enhed indlæses.
+
+Hvis der ikke er en kompatibel enhed som indlæses ses den ikke som at 
+værende aktiv.
+
+
+Beskriv:
+Hvad modulet bruges til
+Om det er indlæst som standard
+
+Opgave 8:
+
+Modulet usb-storage skal bruges.
+
+Indlæse modulet
+bekræft det er aktivt
+fjern modulet igen
+
+sudo modprobe usb-storage/usb_storage
+vil føre til at modulet bliver indlæset.
+
+Eftersom dette er gjort bekræftes at det er aktivt ved at bruge lsmod.
+
+Fjernelse af modulet kan gøres via modprobe -r usb-storage 
+
+Opgave 9:
+
+Vi skal:
+* konfigurere systemet til automatisk at indlæse usb_storage ved opstart.
+
+Gå ind i /etc/modules-load.d
+
+Rediger modules.conf og skriv ind usb_storage så usb_storage indlæses ved opstart. 
+Den relevante konfigurationsfil er modules.conf
+
+
+
+
+* Finde og beskrive den relevant konfigurationsfil
+
+Opgave 10:
+
+* Undersøge eksisterende kernelparametre.
+
+Kernel.hostname = benja
+
+kan findes med sysctl kernel.hostname eller cat /proc/sys/kernel/hostname
+
+* Ændre parameteren kernel.hostname midlertidigt.
+
+sudo sysctl -w kernel.hostname=<navn>
+
+Bruges til at ændre navnet på kernel.hostname.
+
+* Bekræfte at ændringen er aktiv.
+
+Ses med sudo sysctl kernel.hostname
+
+Opgave 11:
+
+* Undersøge kernel-loggen
+
+sudo journalctl -k -b
+
+sudo journalctl -k -b | less
+
+kan bruges for at se kernel-log for nuværende boot
+
+sudo journalctl -k -b -1 | less
+
+kan bruges for forrige boot
+
+* Find mindst:
+
+En informationsmeddelse
+
+informations meddelse kan findes med
+
+sudo dmesg -T -l info | tail -n 30
+
+-T giver læsbare tidsstempler
+-l info viser "info"-niveau
+tail -n 30 viser kun de sidste 30 linjer.
+
+En advarsel eller fejl (hvis tilgængelig)
+
+sudo dmesg -T -l warn,err,crit,alert,emerg | tail -n 50
+
+tjekker for warnings,errors,critical,alerts,emergency indenfor de sidste 50 linjer.
+
+
+* Identificer hvilken komponent meddelelsen relaterer sig til
+
+Komponenter står typisk ligesom nedenstående
+
+... kernel: iwlwifi 0000:00:14.3: Microcode SW error detected...
+
+Hvis komponenten ligner et modul/driver-navn f.eks. "usb_storage"
+
+lsmod | grep -i <usb_storage>
+
+modinfo usb_storage | head -n 20
+
+hvis komponenten relaterer sig til en enhed/driver på PCI(netkort, NVMe, Wi-Fi)
+lspci -k | less 
+
+hvis det er relateret til USB:
+lsusb -t
+
+Ekstraopgaver:
+
+Beskyt GRUB med adgangskode
