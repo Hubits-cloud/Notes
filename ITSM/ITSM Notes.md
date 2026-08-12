@@ -731,6 +731,96 @@ Availability mgmt, Business analysis, Capacity & performance mgmt, **Change enab
 
 ---
 
+# 👥 Module 19: ITSM / ITIL Roles & Responsibilities
+
+> ITIL 4 talks about **roles** (a set of responsibilities), not job titles — one person can hold several roles, and one role can be shared. Roles are assigned to people; **accountability can't be delegated, responsibility can**.
+
+## 19.1 Accountability model — RACI
+
+- **RACI**: A responsibility-assignment matrix mapping roles to activities.
+  * **R — Responsible**: does the work (can be several people).
+  * **A — Accountable**: owns the outcome, signs off — **exactly one** per activity.
+  * **C — Consulted**: gives input (two-way).
+  * **I — Informed**: kept up to date (one-way).
+
+## 19.2 Two foundational role concepts
+
+- **Service Owner**: Accountable for a **specific service** end-to-end, across its whole lifecycle, regardless of where the components/teams sit.
+- **Process/Practice Owner**: Accountable for the **design, documentation, and fitness** of a practice (the "how it should work").
+- **Process/Practice Manager**: Accountable for the **day-to-day operational running** of the practice (the "make it happen now"). Often the same person in small teams.
+
+## 19.3 ITIL 4 competency codes (LACMT)
+
+Each role in an ITIL 4 practice guide is tagged with one or more competency letters:
+
+| Code | Competency | Description |
+| ---- | ---------- | ----------- |
+| **L** | Leader | Decision-making, delegation, oversight, direction. |
+| **A** | Administrator | Assign/prioritize, administer, report. |
+| **C** | Coordinator / Communicator | Coordinate activity, communicate, maintain relationships. |
+| **M** | Methods & techniques expert | Design/define work, apply methods, evaluate. |
+| **T** | Technical expert | Deep technical/specialist knowledge. |
+
+## 19.4 Quick-reference — key roles by practice
+
+| Role | Practice | Core responsibility |
+| ---- | -------- | ------------------- |
+| **Change Manager** | Change Enablement | Owns the change process; assesses, authorizes, schedules changes; runs/chairs the CAB. |
+| **Change Authority** | Change Enablement | Person/group that authorizes a specific change (varies by change type/risk). |
+| **Incident Manager** | Incident Management | Owns the incident process; drives fast restoration; manages escalations. |
+| **Major Incident Manager** | Incident Management | Coordinates the response to major incidents (the "incident commander"). |
+| **Problem Manager** | Problem Management | Owns root-cause analysis; manages known errors & workarounds. |
+| **Service Desk Analyst/Agent** | Service Desk | First-line SPOC; logs, triages, resolves or escalates. |
+| **Service Desk Manager** | Service Desk | Owns service desk performance, staffing, and user experience. |
+| **Service Level Manager** | SLM | Negotiates, monitors, and reports on SLAs/OLAs/UCs. |
+| **Configuration Manager** | Service Configuration Mgmt | Owns the CMDB/CMS; ensures accurate CI data & relationships. |
+| **Release Manager** | Release Management | Plans, schedules, and controls releases into live use. |
+| **Deployment Manager** | Deployment Management | Moves components into live/test environments. |
+| **Knowledge Manager** | Knowledge Management | Owns the knowledge base; drives capture, quality, and reuse. |
+| **Availability Manager** | Availability Management | Ensures services meet agreed availability targets. |
+| **Capacity Manager** | Capacity & Performance Mgmt | Ensures capacity/performance meets current & future demand. |
+| **IT Asset Manager** | IT Asset Management | Owns asset lifecycle, cost, and disposal. |
+| **Service Continuity Manager** | Service Continuity Mgmt | Owns DR/BC plans so services survive major disruption. |
+| **Supplier/Vendor Manager** | Supplier Management | Owns supplier relationships, contracts, and performance. |
+
+## 19.5 Roles worth knowing in detail
+
+- **Change Manager**
+  * Accountable for the change enablement practice and its performance.
+  * Assesses risk/impact, decides change type (standard/normal/emergency), authorizes or routes to the right change authority.
+  * Chairs the **CAB** (and **ECAB** for emergencies); maintains the **change schedule**.
+  * Modern shift: less "gatekeeper," more **enabler** — sets up peer-review and automated/pre-approved paths for low-risk changes.
+
+- **Incident Manager vs Major Incident Manager**
+  * *Incident Manager* owns the process, metrics (MTTR), and continual improvement of incident handling.
+  * *Major Incident Manager / Incident Commander* takes command during a major incident: coordinates responders, runs comms, keeps a single source of truth, and hands off to the PIR afterwards.
+
+- **Problem Manager**
+  * Turns recurring/high-risk incidents into investigations; documents **known errors** and **workarounds**; drives permanent fixes via change enablement.
+  * Prioritizes by risk — not every problem gets analyzed.
+
+- **Configuration Manager**
+  * Defines CMDB scope (start narrow!), data model, and audit process; keeps CI relationships accurate for impact analysis.
+
+- **Service Owner vs Process Owner** (common exam trap)
+  * *Service Owner* = accountable for **one service** across all practices.
+  * *Process/Practice Owner* = accountable for **one practice** across all services.
+
+## 19.6 Modern / DevOps-adjacent roles
+
+- **Incident Commander**: leads major-incident response (owns decisions/comms, not the fix).
+- **On-call Engineer**: responds to alerts on a rota; uses runbooks to remediate.
+- **Product Owner** (Agile): prioritizes the backlog and defines value for a product/service.
+- **SRE (Site Reliability Engineer)**: applies software engineering to ops — reliability, automation, error budgets.
+
+## ✅ Summary
+
+- Roles ≠ job titles; **accountability is singular (one "A" in RACI)**, responsibility can be shared.
+- **Service Owner** = one service, all practices; **Practice Owner** = one practice, all services.
+- Each practice has a lead role: **Change Manager, Incident Manager, Problem Manager, Configuration Manager**, etc.
+- ITIL 4 tags roles with **LACMT** competencies.
+- Modern ops adds **Incident Commander, On-call Engineer, SRE, Product Owner**.
+
 # 🎯 Master Cheat Sheet
 
 - **ITSM** = managing IT as a service to co-create value; **ITIL** = the leading best-practice framework ("adopt and adapt").
