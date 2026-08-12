@@ -821,6 +821,450 @@ Each role in an ITIL 4 practice guide is tagged with one or more competency lett
 - ITIL 4 tags roles with **LACMT** competencies.
 - Modern ops adds **Incident Commander, On-call Engineer, SRE, Product Owner**.
 
+# 🔬 Module 20: Core Operational Practices — Deep Dive
+
+Covers the five practices you'll touch most as a technician: **Event, Incident, Request, Problem, and Change**. ITIL 4 renames some (Event → *Monitoring & Event Management*; Request → *Service Request Management*; Change → *Change Enablement*), but the classic names are still used everywhere.
+
+---
+
+## 🖥️ 20.1 Event Management (Monitoring & Event Management)
+
+- **Event**: Any change of state that is **significant for the management** of a CI or service. Detected by a tool, not (usually) a human.
+- **Alert**: A notification that a threshold has been reached, something changed, or a failure occurred — an event *worth telling someone about*.
+- **Purpose**: Systematically **observe** services & CIs, **detect** and **record** state changes, and decide the right response. It's the "eyes and ears" of operations and the main trigger for proactive work.
+
+### Monitoring types
+
+- **Active** — the tool polls/queries a CI on a schedule ("are you alive?").
+- **Passive** — the CI reports its own state to the tool (sends events/traps).
+- **Reactive** — respond to something that already happened (e.g. an exception).
+- **Proactive** — spot trends/warnings *before* users are impacted.
+
+### The three event types
+
+| Type | Meaning | Typical response |
+| ---- | ------- | ---------------- |
+| **Informational** | Normal operation, no action needed | Log only (audit/trend data). |
+| **Warning** | Approaching a threshold/limit | Investigate before it breaches. |
+| **Exception** | A breach, error, or failure | Action required — often raises an **incident**. |
+
+### Event lifecycle
+
+1. **Detect / Notify** — event occurs and is captured.
+2. **Filter** — decide if it's significant or noise (suppress the rest).
+3. **Correlate** — group related events; apply rules/thresholds.
+4. **Trigger response** — auto-remediate, raise incident/request, or notify.
+5. **Review & close** — confirm handled; feed data into improvement.
+
+- **Thresholds**: The limit that turns a metric into a warning/exception (e.g. disk >90%).
+- **Correlation**: Combining many raw events into one meaningful signal → reduces **alert fatigue**.
+- **Link to Incident**: An exception event commonly auto-creates an incident; not every event is an incident.
+
+### Key metrics
+
+- Number of events by type; % auto-resolved; false-positive/noise rate; event-to-incident ratio; time from detection → response.
+
+### ✅ Summary
+
+- **Event** = significant change of state; types = **Informational / Warning / Exception**.
+- Monitoring = **active/passive**, **reactive/proactive**.
+- Flow: detect → **filter → correlate** → respond → close.
+- Exceptions feed **Incident Management**; good correlation kills alert fatigue.
+
+---
+
+## 🚨 20.2 Incident Management
+
+- **Incident**: An **unplanned interruption** to a service, or a **reduction in its quality**.
+- **Purpose**: Restore normal service operation **as quickly as possible** and minimize business impact. (Restore *first* — root cause is Problem Management's job.)
+- **Workaround**: A temporary way to restore service without fixing the underlying cause.
+
+### Priority = Impact × Urgency
+
+- **Impact** = size/scale of business effect (how many users, how critical).
+- **Urgency** = how fast a resolution is needed.
+- Combined via a **priority matrix** (P1 Critical → P5 Planning) which drives **target resolution times** in the SLA.
+
+### Process flow
+
+1. **Detect & Log** — from users (portal/phone/email), the service desk, or events. Capture full details.
+2. **Categorize** — classify (service, type) for routing and reporting.
+3. **Prioritize** — set priority from impact × urgency.
+4. **Initial diagnosis** — service desk attempts first-line fix (check the **KEDB** for known errors/workarounds).
+5. **Escalate if needed**:
+   * **Functional (horizontal)** → a team with more expertise (Tier 1 → 2 → 3).
+   * **Hierarchical (vertical)** → management, for authority/awareness (e.g. major incidents).
+6. **Investigate & Diagnose** — find what's wrong (most time is spent here).
+7. **Resolve & Recover** — apply fix or workaround; verify service is back.
+8. **Close** — confirm with the user, record resolution, categorize for trends.
+
+### Incident model
+
+- A **pre-defined set of steps** for handling a common/recurring incident type → consistent, faster handling.
+
+### Major incidents
+
+- Highest impact/urgency → **separate procedure**, dedicated **Major Incident Manager / Incident Commander**, and high-visibility comms.
+- **Swarming**: relevant people work the incident together at the start until it's clear who owns it.
+- Followed by a **PIR (Post-Incident Review)** — blameless, feeds Problem Management.
+
+### Modern practices
+
+- On-call rotations & alerting, **ChatOps** (Slack), **runbooks**, status pages for user comms.
+
+### Key metrics
+
+- **MTTR** (mean time to restore/resolve), **MTTA** (mean time to acknowledge), **MTBF** (mean time between failures), **FCR** (first-contact resolution), % resolved within SLA, reopen rate, backlog size.
+
+### ✅ Summary
+
+- **Restore fast**; use workarounds; don't hunt root cause here.
+- **Priority = Impact × Urgency**.
+- Flow: **Log → Categorize → Prioritize → Diagnose → Escalate → Resolve → Close**.
+- Escalation = **functional (expertise)** vs **hierarchical (authority)**.
+- Major incident → dedicated commander + **PIR**.
+
+---
+
+## 📥 20.3 Request Fulfilment (Service Request Management)
+
+- **Service Request**: A request from a user for something **normal, planned, and pre-approved** — info, access, a password reset, new hardware/software, advice. **Not a failure.**
+- **Purpose**: Handle all requests **efficiently and user-friendly** through standardized, repeatable workflows.
+- **Request fulfilment** = managing the entire lifecycle of every service request.
+
+### Incident vs Request (the key distinction)
+
+| | Incident | Service Request |
+| --- | -------- | --------------- |
+| Trigger | Something **broke** | User **wants** something normal | 
+| Nature | Unplanned | Planned / pre-approved |
+| Goal | Restore service | Deliver the request |
+| Example | "Email is down" | "Set up an email account" |
+
+### Process flow
+
+1. **Submit** — user raises a request, ideally via **self-service portal / service catalogue**.
+2. **Log & validate** — confirm it's a valid, defined request type.
+3. **Approve** — if needed (financial, managerial, access). Many standard requests are **pre-approved**.
+4. **Fulfil** — carry out the task (often automated, or routed to the right team).
+5. **Close** — confirm delivery with the user; capture satisfaction (CSAT).
+
+### Key concepts
+
+- **Request model**: A predefined workflow for a common request type (approval path, tasks, SLA).
+- **Service catalogue**: The user-facing menu of available requestable services.
+- **Shift-left**: Push fulfilment toward the user — self-service, knowledge base, automation → faster, cheaper.
+- Distinct approvals and SLAs from incidents (they're not competing for "restore" urgency).
+
+### Key metrics
+
+- Request volume by type, % via self-service, mean time to fulfil, SLA success rate, backlog size, cost per request, CSAT, deflection rate (KB self-serve).
+
+### ✅ Summary
+
+- **Request = planned, pre-approved** user ask — **not** an incident.
+- Standardize with **request models** + a **service catalogue**.
+- **Shift left**: self-service + automation.
+- Watch fulfil time, SLA %, and CSAT.
+
+---
+
+## 🧩 20.4 Problem Management
+
+- **Problem**: A **cause, or potential cause, of one or more incidents**.
+- **Known Error**: A problem that has been **analyzed but not yet resolved** (root cause understood, fix pending).
+- **Workaround**: A documented temporary way to reduce/eliminate impact.
+- **KEDB (Known Error Database)**: Store of known errors + their workarounds — lets the service desk resolve repeat incidents fast.
+- **Purpose**: Reduce the **likelihood and impact** of incidents by finding root causes and managing known errors.
+
+### Reactive vs Proactive
+
+- **Reactive** — investigate the cause *after* incidents have occurred.
+- **Proactive** — analyze trends/data to prevent incidents *before* they happen.
+
+### Three phases
+
+| Phase | What happens |
+| ----- | ------------ |
+| **1. Problem Identification** | Detect & log problems (from incident trends, PIRs, event data, supplier info). |
+| **2. Problem Control** | Analyze, prioritize (by **risk**), document **known errors** and **workarounds**. |
+| **3. Error Control** | Manage known errors over time; drive permanent fixes — usually raised as a **change**. |
+
+- **Prioritize by risk** — you don't need to analyze *every* problem; make real progress on the high-risk ones.
+
+### Root Cause Analysis (RCA) techniques
+
+- **5 Whys** — ask "why?" repeatedly to drill to the cause.
+- **Ishikawa / Fishbone diagram** — map cause categories (people, process, tech, etc.).
+- **Kepner-Tregoe** — structured problem analysis.
+- **Pareto analysis** — 80/20; focus on the vital few causes.
+- **Fault tree / timeline analysis** — trace failure paths / sequence of events.
+
+### Relationships
+
+- **Incident → Problem**: recurring/major incidents spawn problem investigations (best done via the **PIR**).
+- **Problem → Change**: permanent fixes are implemented through **Change Enablement**.
+- **Blend incident + problem** so it's one stream of work, not a giant problem backlog.
+
+### Key metrics
+
+- Number of problems resolved, repeat-incident rate, average time to identify root cause, known errors with workarounds, incidents prevented (proactive), backlog of open problems.
+
+### ✅ Summary
+
+- **Problem = cause of incidents**; **Known Error = understood, unresolved**; **Workaround = temp fix** (stored in the **KEDB**).
+- Phases: **Identification → Control → Error Control**.
+- **Reactive vs Proactive**; RCA via **5 Whys, Fishbone, Pareto**.
+- Permanent fixes go through **Change**.
+
+---
+
+## 🔧 20.5 Change Management (Change Enablement)
+
+- **Change**: The **addition, modification, or removal** of anything that could have a direct or indirect effect on services.
+- **Purpose**: **Maximize successful changes** by properly assessing risk, authorizing, and scheduling — balancing **beneficial change** against **protecting users from disruption**.
+
+### The three change types
+
+| Type | Risk | Authorization | Example |
+| ---- | ---- | ------------- | ------- |
+| **Standard** | Low, well-understood | **Pre-authorized** (follows a set procedure) | Password reset, add memory, new DB instance. |
+| **Normal** | Varies | Assessed & authorized by a **change authority** (may need **CAB**) | New data-centre migration, performance upgrade. |
+| **Emergency** | Urgent | Expedited; often an **ECAB** | Security patch, fixing a live outage. |
+
+### Key roles & artefacts
+
+- **Change Authority** — person/group who authorizes a specific change.
+- **CAB (Change Advisory Board)** — advises on assessment, prioritization, and scheduling of normal changes.
+- **ECAB (Emergency CAB)** — smaller/faster group for emergency changes.
+- **Change Schedule** (a.k.a. Forward Schedule of Changes) — plan of upcoming changes to avoid clashes and plan resources.
+- **Remediation / back-out plan** — how to reverse the change if it fails. *Mandatory* for a well-planned change.
+
+### The 7 Rs of change assessment (classic checklist)
+
+1. **Raised** — who raised the change?
+2. **Reason** — why is it needed?
+3. **Return** — what's the expected benefit/return?
+4. **Risks** — what are the risks of doing it (and of *not* doing it)?
+5. **Resources** — what's needed to build/deploy it?
+6. **Responsible** — who builds, tests, implements it?
+7. **Relationships** — what other changes/CIs does it affect?
+
+### Process flow
+
+1. **Request (RFC — Request for Change)** — log the change.
+2. **Assess & categorize** — determine type, risk, impact (use the 7 Rs).
+3. **Authorize** — the appropriate change authority approves/rejects.
+4. **Schedule** — add to the change schedule; plan resources & back-out.
+5. **Build & test** — in a non-prod environment where possible.
+6. **Implement / Deploy** — via Release & Deployment.
+7. **Review & close** — did it succeed? Any incidents caused? Lessons learned.
+
+### Modern (adaptive) change enablement
+
+- Stop treating change as **one-size-fits-all** — classify by risk, decide with data.
+- **Make standard change the norm** — move proven low-risk changes to pre-approved/automated paths.
+- **CAB as enabler, not gatekeeper** — push approval closer to the doers; use **peer review** (a top predictor of high performance).
+- **DevOps / CI-CD change** — code deploys auto-create change records, auto-assess risk, flag only high-risk ones.
+
+### Key metrics
+
+- **Change success rate**, **change failure rate** (% causing incidents), average **change lead time**, number/duration of change-related incidents, % of standard (pre-approved) changes, unauthorized-change count, audit/compliance findings.
+
+### ✅ Summary
+
+- **Change = add/modify/remove** anything affecting services; balance **risk vs speed**.
+- Types: **Standard (pre-approved) / Normal (CAB) / Emergency (ECAB)**.
+- Assess with the **7 Rs**; always have a **back-out plan**.
+- Flow: **RFC → Assess → Authorize → Schedule → Build/Test → Deploy → Review**.
+- Modern CAB = **enabler**; automate standard changes; **peer review** wins.
+
+
+# 🔬 Module 21: Service Support Practices — Deep Dive
+
+Covers **Service Level Management, the Service Desk, and Service Configuration Management (CMDB)**. These are the practices that hold the operational ones together — SLM sets the targets, the Service Desk is the front door, and Configuration Management is the source of truth everything else relies on.
+
+---
+
+## 📏 21.1 Service Level Management (SLM)
+
+- **Purpose**: Set clear, **business-based targets** for service performance, and ensure delivery is properly **measured, monitored, reviewed, and reported** against them.
+- SLM is the practice that turns vague expectations ("it should be fast") into **agreed, measurable commitments**.
+- It's the ongoing conversation between provider and customer about whether the service is actually meeting their needs — not just whether the metrics are green.
+
+### The agreement stack
+
+| Agreement | Between | Nature |
+| --------- | ------- | ------ |
+| **SLA (Service Level Agreement)** | Provider ↔ **Customer** | The targets & responsibilities for a service. |
+| **OLA (Operational Level Agreement)** | **Internal** provider teams | Internal commitments that *underpin* the SLA. |
+| **UC (Underpinning Contract)** | Provider ↔ **External supplier** | A legally binding contract that underpins the SLA. |
+
+- **Key chain**: An SLA can only be met if the supporting **OLAs and UCs** are met. If a third party's UC promises 8-hour repair, you can't promise the customer a 4-hour SLA.
+
+### What makes a good SLA
+
+- **Simple & clearly worded** — no ambiguity, no jargon the customer can't check.
+- **Business/outcome-focused** — measures what the customer cares about, not internal component stats.
+- **Realistic & agreed** — both parties sign up to achievable targets.
+- **Measurable** — every target maps to a metric you actually capture.
+- **Includes**: scope, service hours, targets, responsibilities, exclusions, reporting cadence, review schedule.
+
+### SLA structures (how they're organized)
+
+- **Service-based** — one SLA covers one service for all its customers (e.g. "email SLA").
+- **Customer-based** — one SLA covers all services for one customer.
+- **Multi-level** — layered: **Corporate** (org-wide) + **Customer** (per customer) + **Service** (per service). Avoids repeating the same terms.
+
+### The "Watermelon SLA" trap ⚠️
+
+- **Green on the outside, red on the inside** — every metric hits target, but the customer is still unhappy.
+- Cause: measuring the *wrong things* (internal component metrics) instead of the customer's actual experience.
+- Fix: pair hard SLA metrics with **XLAs (Experience Level Agreements)** / CSAT and real customer feedback.
+
+### Key activities
+
+1. Understand and document business requirements.
+2. Negotiate & agree SLAs (and the underpinning OLAs/UCs).
+3. Monitor and measure performance against targets.
+4. Report on performance (SLA reports).
+5. Conduct **Service Reviews** with the customer.
+6. Log improvements in the **CIR** and feed continual improvement.
+7. Manage **SLA breaches** — escalate, remediate, review.
+
+### Key metrics
+
+- SLA compliance %, number/severity of SLA breaches, CSAT/XLA scores, trend of targets met over time, number of services with agreed & current SLAs.
+
+### ✅ Summary
+
+- SLM = agree, monitor, review, and report on **service targets**.
+- **SLA** (customer) is underpinned by **OLA** (internal) + **UC** (supplier) — the chain must all hold.
+- SLAs are **service-based / customer-based / multi-level**.
+- Avoid the **watermelon SLA** — measure the customer's *experience*, not just components.
+
+---
+
+## ☎️ 21.2 The Service Desk
+
+- **Purpose**: Be the **Single Point of Contact (SPOC)** between the service provider and its users — capturing demand for **incident resolution** and **service requests**.
+- **Modern focus**: Supporting **"people and business,"** not just fixing broken tech. With automation removing routine work, the desk increasingly *arranges, explains, and coordinates* things — it's a key part of the service relationship, not a call-logging function.
+- The desk's biggest value is often **empathy, communication, and experience** — not deep technical skill.
+
+### What the Service Desk does
+
+- Logs, categorizes, prioritizes **incidents** and **service requests**.
+- Provides **first-line** diagnosis & resolution (checks the KEDB / knowledge base).
+- **Escalates** what it can't resolve; keeps users informed throughout.
+- Owns **user communications** — outage notices, status, updates.
+- Acts as the coordination hub across the other practices.
+
+### Service Desk structures (types)
+
+| Type | Description | Trade-off |
+| ---- | ----------- | --------- |
+| **Local** | Physically near the users it supports. | Great for on-site/local needs; expensive to duplicate. |
+| **Centralized** | One desk serves multiple locations. | Efficient & consistent; may lose local touch. |
+| **Virtual** | Staff distributed, appear as one desk (via tooling). | Flexible, location-independent; needs strong tools/process. |
+| **Follow-the-Sun** | Desks in different time zones hand off. | 24/7 coverage without night shifts; needs tight handover. |
+| **Specialized** | Routing straight to a skilled group for certain issue types. | Faster expert resolution; needs accurate categorization. |
+
+### Support tiers (staffing model)
+
+- **Tier 0 / Self-service** — knowledge base, portal, chatbot (no agent).
+- **Tier 1 / First-line** — the service desk; logs and resolves common issues.
+- **Tier 2 / Second-line** — more specialized technical teams.
+- **Tier 3 / Third-line** — deep experts, vendors, or developers.
+- Movement between tiers = **functional escalation**.
+
+### Channels
+
+- Phone, email, **self-service portal**, live chat, walk-up, chatbot/virtual agent, social/messaging.
+
+### Skills that matter
+
+- Communication & empathy, incident/request handling, business awareness, prioritization, accurate logging/categorization, tool proficiency.
+
+### Key metrics
+
+- **FCR (First Contact Resolution)**, average speed to answer, abandonment rate, tickets by channel, **CSAT**, backlog, reopen rate, self-service deflection rate, cost per contact.
+
+### ✅ Summary
+
+- Service Desk = the **SPOC** and front door for all users.
+- Handles **incidents + requests**, first-line fix, escalation, and user comms.
+- Structures: **Local / Centralized / Virtual / Follow-the-Sun / Specialized**.
+- Tiers **0→3**; movement up = **functional escalation**.
+- Value = **experience & communication**, measured by **FCR + CSAT**.
+
+---
+
+## 🗃️ 21.3 Service Configuration Management (CMDB)
+
+- **Purpose**: Ensure **accurate and reliable information** about the **configuration** of services — and the **CIs** that support them — is available **where and when it's needed**.
+- It's the **source of truth** that Incident, Problem, and Change all depend on for **impact analysis** ("if this breaks / changes, what else is affected?").
+
+### Core terms
+
+- **CI (Configuration Item)**: Any component that must be **managed** to deliver a service — hardware, software, networks, buildings, people, documents, suppliers.
+- **CMDB (Configuration Management Database)**: Stores CIs and, crucially, the **relationships between them**.
+- **CMS (Configuration Management System)**: The broader set of tools & data that manage configuration information — can federate **multiple CMDBs** and other data sources.
+- **Attribute**: A piece of info about a CI (owner, version, location, status, serial number).
+- **Relationship**: How CIs connect ("runs on," "depends on," "connected to").
+- **Service map / Service model**: The high-level view of a service and all the CIs/dependencies beneath it.
+- **DML (Definitive Media Library)**: Secure store of authorized software versions/master copies.
+- **Baseline**: A snapshot of a configuration at a point in time (to compare against or roll back to).
+
+### CI vs Asset (common exam trap)
+
+| | **Configuration Item (CI)** | **IT Asset** |
+| --- | --- | --- |
+| Concern | **Relationships & how it supports services** | **Financial value & lifecycle** |
+| Managed by | Service Configuration Management | IT Asset Management (ITAM) |
+| Example question | "What depends on this server?" | "What did this server cost, and when does it retire?" |
+
+- Something can be **both** a CI and an asset; modern tools often store them together.
+
+### Key activities
+
+1. **Identify** CIs and define what's in scope (start narrow!).
+2. **Control** — only add/change CIs through proper process (keep it accurate).
+3. **Record & maintain** attributes and relationships.
+4. **Verify & audit** — regularly check the CMDB matches reality.
+5. **Discovery & automation** — auto-detect CIs and relationships and keep them current.
+
+### The golden rule: balance effort vs value
+
+- Detailed data on **every** component is **costly** and can deliver **little value**.
+- Base the level of detail on **organizational goals** and how config data actually creates value.
+
+### CMDB reality check ⚠️
+
+- ~**80% of CMDB projects fail** — almost always from **too wide a scope** at the start (collecting everything, valuable or not, then failing to keep it current).
+- **Fix**:
+  * Start with **1–2 critical business services**; grow the map as you learn.
+  * Use **data federation** — pull live data from source systems (AWS, Azure, Jamf, SCCM) rather than duplicating it.
+  * Use **discovery + automation** to build and refresh CI relationships.
+  * **Audit** for accuracy; connect config goals to **business goals**.
+
+### Why it matters to the other practices
+
+- **Incident** → quickly see affected services & dependencies to find the cause.
+- **Problem** → trace dependencies during root-cause analysis.
+- **Change** → assess **impact & risk** before authorizing (the 7 Rs' "Relationships").
+
+### Key metrics
+
+- CMDB accuracy (% verified via audit), % of CIs discovered/automated, number of unauthorized CIs found, coverage of critical services, data staleness, incidents/changes using CMDB data for impact analysis.
+
+### ✅ Summary
+
+- Config Management = the **accurate source of truth** about **CIs and their relationships**.
+- **CMDB** (data) sits inside the **CMS** (system); **DML** stores authorized software.
+- **CI ≠ Asset**: CI = relationships/service support; Asset = cost/lifecycle.
+- **Balance effort vs value** — 80% of CMDBs fail from over-scoping; **start narrow, federate, automate, audit**.
+- Feeds **impact analysis** for Incident, Problem, and Change.
+
 # 🎯 Master Cheat Sheet
 
 - **ITSM** = managing IT as a service to co-create value; **ITIL** = the leading best-practice framework ("adopt and adapt").
